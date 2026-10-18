@@ -1,8 +1,14 @@
 library(stringr)
-text2025 = readLines("raw_html/2025.html")
-text2025 = text2025[-(1:1000)]
-text2025 = paste(text2025, collapse = "\n")
-text2025 = str_remove(text2025, ".*Panel u.*Panel u.*>")
-text2025 = str_remove_all(text2025, "\t")
-text2025_split = strsplit(text2025, "rank-")
 
+rawtext = readLines("raw_html/2024.html")
+
+top100 = function(text) {
+  text = text[-(1:1000)]
+  text = paste(text, collapse = "\n")
+  text = str_remove(text, ".*Panel u.*Panel u.*>")
+  text = str_remove_all(text, "\t")
+  split_text = unlist(strsplit(text, "rank-"))
+  return(split_text[2:length(split_text)])
+}
+
+top100(rawtext)
