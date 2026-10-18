@@ -1,6 +1,7 @@
 library(stringr)
+library(magrittr)
 
-rawtext = readLines("raw_html/2024.html")
+#rawtext = readLines("raw_html/2024.html")
 
 top100 = function(text) {
   text = text[-(1:1000)]
@@ -21,25 +22,35 @@ parseLine = function(textfrag) {
   Nspecies=str_match(textfrag, "species[\\s\\S]*>\\n\\n\\n(\\d+)\\n\\n<")[2]
   percentTotal=str_match(textfrag, "\n\n\n(\\d+\\.?\\d*)%")[2]
   temp = str_match(textfrag, 
-      "ResultsStats-details-detail\">([A-Z][a-zA-Z '-]*) <em class=\"sci\">(([A-Z][a-z]*) [a-z-]*)</em> \\((.*)\\)")
+      "ResultsStats-details-detail\">([A-Z][a-zA-Z '-]*) <em class=\"sci\">(([A-Z][a-z]*) [a-z-]*)</em> \\((.*(\\d\\d\\d\\d))\\)")
   commonName=temp[2]
   species=temp[3]
   genus=temp[4]
   date=temp[5]
+  year=temp[6]
   
-  return( c(rank, name, checklists, Nspecies, percentTotal, commonName, species, genus, date))
+  return( c(rank, name, checklists, Nspecies, percentTotal, commonName, species, genus, date, year))
 }
 
 rawToDF = function(text) {
-  df = data.frame(matrix(ncol=9, nrow=0))
+  df = data.frame(matrix(ncol=10, nrow=0))
   mmm=Map(parseLine, top100(text))
   for (row in mmm) {
     df = rbind(df, row)
   }
   colnames(df)= c("rank", "name", "Nchecklists", 
                 "Nspecies", "percentTotal", "commonName", 
-                "species", "genus", "date")
+                "species", "genus", "date", "year")
   return(df)
 }
 
-rawToDF(rawtext)
+
+df = data.frame(matrix(ncol=10, nrow=0))
+for (year in 2025:2016){
+  df %<>% rbind(rawToDF(readLines(sprintf("raw_html/%d.html", year))))
+}
+
+#the df is too big to print, 
+#but this sampling gives you an idea of what it contains.  
+df[sample(nrow(df), 20), ]
+
