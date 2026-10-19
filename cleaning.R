@@ -44,13 +44,12 @@ rawToDF = function(text) {
   return(df)
 }
 
-
-df = data.frame(matrix(ncol=10, nrow=0))
-for (year in 2025:2016){
-  df %<>% rbind(rawToDF(readLines(sprintf("raw_html/%d.html", year))))
+clean = function() {
+  df = data.frame(matrix(ncol=10, nrow=0))
+  for (year in 2025:2016){
+    df %<>% rbind(rawToDF(readLines(sprintf("raw_html/%d.html", year))))
+  }
+  return(df)
 }
 
-#the df is too big to print, 
-#but this sampling gives you an idea of what it contains.  
-df[sample(nrow(df), 20), ]
 
