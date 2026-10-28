@@ -1,5 +1,7 @@
 library(stringr)
 library(magrittr)
+library(anytime)
+library(lubridate)
 
 #rawtext = readLines("raw_html/2024.html")
 
@@ -17,7 +19,8 @@ top100 = function(text) {
 
 parseLine = function(textfrag) {
   rank=str_match(textfrag, ">(\\d*)\\.<")[2]
-  name=str_match(textfrag, "h5 id=\"([A-Za-z (&amp;),-]+)\" class")[2]
+  #name=str_match(textfrag, "h5 id=\"([A-Za-z (&amp;)\\.’,-]+)\" class")[2]
+  name=str_match(textfrag, "h5 id=\"(.+)\" class")[2]
   checklists=str_match(textfrag, ">\\n\\n\\n(\\d+)\\n\\n<")[2]
   Nspecies=str_match(textfrag, "species[\\s\\S]*>\\n\\n\\n(\\d+)\\n\\n<")[2]
   percentTotal=str_match(textfrag, "\n\n\n(\\d+\\.?\\d*)%")[2]
@@ -28,8 +31,10 @@ parseLine = function(textfrag) {
   genus=temp[4]
   date=temp[5]
   year=temp[6]
+  dayCt= ( ymd(anydate(date))-ymd(sprintf("%s-1-1", year)) ) %>% 
+    as.double() + 1
   
-  return( c(rank, name, checklists, Nspecies, percentTotal, commonName, species, genus, date, year))
+  return( c(rank, name, checklists, Nspecies, percentTotal, commonName, species, genus, date, year, dayCt))
 }
 
 rawToDF = function(text) {
@@ -40,7 +45,7 @@ rawToDF = function(text) {
   }
   colnames(df)= c("rank", "name", "Nchecklists", 
                 "Nspecies", "percentTotal", "commonName", 
-                "species", "genus", "date", "year")
+                "species", "genus", "date", "year", "dayCt")
   return(df)
 }
 
